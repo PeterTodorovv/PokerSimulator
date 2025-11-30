@@ -1,0 +1,25 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+      {
+        "name": "Launch Go App",
+        "type": "go",
+        "request": "launch",
+        "mode": "debug",
+        "stopOnEntry": false,
+        "program": "./main.go",
+        "env": {},
+        "args": [],
+        "console": "integratedTerminal"
+      },
+      {
+        "name": "Attach to Process",
+        "type": "go",
+        "request": "attach",
+        "mode": "local",
+        "stopOnEntry": false,
+        "console": "integratedTerminal",
+        "processId": "${process.id}"
+      }
+    ]
+  }
