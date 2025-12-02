@@ -5,5 +5,5 @@ import (
 )
 
 func main() {
-	simulator.SimulatePreFlopStandOff(10000)
+	simulator.SimulatePreFlopThreePlayers(1000000000)
 }

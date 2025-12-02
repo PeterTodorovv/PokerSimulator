@@ -19,13 +19,13 @@ func CalculateHand(hand Hand, river []Card) HandResult {
 		combination = flushCombination
 
 		//TODO Fix royal flush
-		
-		// straightFlush := getStreight(combination.acticveCards)
 
-		// if straightFlush.Combination != -1 {
-		// 	straightFlush.Combination = STRAIGHT_FLUSH
-		// 	combination = straightFlush
-		// }
+		straightFlushResult := getStreightFlush(sortedHand)
+
+		if straightFlushResult.Combination != -1 {
+			straightFlushResult.Combination = STRAIGHT_FLUSH
+			combination = straightFlushResult
+		}
 	}
 
 	return combination
@@ -172,136 +172,6 @@ func sortHand(cards []Card) []Card {
 	return cards
 }
 
-func getMatchingCombinations(scoreHand []Card) HandResult {
-	highStreak := 0
-	streakNumber := 0
-	currentCard := 0
-	currentStreak := 1
-
-	for _, card := range scoreHand {
-		if card.Number == currentCard {
-			currentStreak++
-
-			if currentStreak > highStreak {
-				streakNumber = card.Number
-				highStreak = currentStreak
-			} else if currentStreak == highStreak && card.Number > streakNumber {
-				streakNumber = card.Number
-				highStreak = currentStreak
-			}
-		} else {
-			if currentStreak > highStreak {
-				streakNumber = card.Number
-				highStreak = currentStreak
-			} else if currentStreak == highStreak && card.Number > streakNumber {
-				streakNumber = card.Number
-				highStreak = currentStreak
-			}
-			currentCard = card.Number
-			currentStreak = 1
-		}
-	}
-
-	socringHand := []int{}
-
-	for i := 0; i < highStreak; i++ {
-		socringHand = append(socringHand, streakNumber)
-	}
-
-	for _, card := range scoreHand {
-		if card.Number != streakNumber {
-			socringHand = append(socringHand, card.Number)
-
-			if len(socringHand) == 5 {
-				break
-			}
-		}
-	}
-
-	//add steak map
-	lengthMap := getCombinationLengthMap()
-
-	return HandResult{
-		Combination:         lengthMap[highStreak],
-		highCardCombination: streakNumber,
-		acticveCards:        socringHand,
-	}
-}
-
-func getMultipairCombinations(scoreHand []Card, currentCombination HandResult) HandResult {
-	highStreak := 0
-	streakNumber := 0
-	currentCard := 0
-	currentStreak := 1
-
-	for _, card := range scoreHand {
-		if card.Number == currentCombination.highCardCombination {
-			continue
-		}
-
-		if card.Number == currentCard {
-			currentStreak++
-
-			if currentStreak > highStreak {
-				streakNumber = card.Number
-				highStreak = currentStreak
-			} else if currentStreak == highStreak && card.Number > streakNumber {
-				streakNumber = card.Number
-				highStreak = currentStreak
-			}
-		} else {
-			if currentStreak > highStreak {
-				streakNumber = card.Number
-				highStreak = currentStreak
-			} else if currentStreak == highStreak && card.Number > streakNumber {
-				streakNumber = card.Number
-				highStreak = currentStreak
-			}
-			currentCard = card.Number
-			currentStreak = 1
-		}
-	}
-	//add steak map
-
-	if highStreak == 2 {
-
-		socringHand := []int{}
-
-		for i := 0; i < currentCombination.Combination+1; i++ {
-			socringHand = append(socringHand, currentCombination.highCardCombination)
-		}
-
-		for i := 0; i < highStreak; i++ {
-			socringHand = append(socringHand, streakNumber)
-		}
-
-		for _, card := range scoreHand {
-			if card.Number != streakNumber {
-				socringHand = append(socringHand, card.Number)
-
-				if len(socringHand) == 5 {
-					break
-				}
-			}
-		}
-
-		streakCombination := 0
-		if currentCombination.Combination == PAIR {
-			streakCombination = TWO_PAIR
-		} else {
-			streakCombination = FULL_HOUSE
-		}
-
-		return HandResult{
-			Combination:         streakCombination,
-			highCardCombination: streakNumber,
-			acticveCards:        socringHand,
-		}
-	}
-
-	return currentCombination
-}
-
 func getFlush(scoreHand []Card) HandResult {
 	clubs := []int{}
 	diamons := []int{}
@@ -399,6 +269,53 @@ func getStreight(scoreHand []Card) HandResult {
 	}
 }
 
+func getStreightFlush(scoreHand []Card) HandResult {
+	hasAce := scoreHand[0].Number == 14
+	lastCard := 0
+	currentSuit := -1
+	currentStreak := []Card{}
+	highStreak := []Card{}
+
+	for i := 0; i < len(scoreHand); i++ {
+		if scoreHand[i].Number == lastCard {
+			continue
+		}
+
+		if lastCard-scoreHand[i].Number == 1 && currentSuit == scoreHand[i].Suit {
+			currentStreak = append(currentStreak, scoreHand[i])
+
+			if len(currentStreak) > len(highStreak) {
+				highStreak = currentStreak
+			}
+		} else {
+			currentStreak = []Card{scoreHand[i]}
+		}
+
+		lastCard = scoreHand[i].Number
+		currentSuit = scoreHand[i].Suit
+
+	}
+
+	if hasAce && len(highStreak) == 4 && highStreak[0].Number == 5 && highStreak[0].Suit == scoreHand[0].Suit {
+		highStreak = append(highStreak, scoreHand[0])
+	}
+
+	straightNumbers := []int{}
+
+	for _, card := range highStreak {
+		straightNumbers = append(straightNumbers, card.Number)
+	}
+	if len(highStreak) >= 5 {
+		return HandResult{
+			Combination:  STRAIGHT,
+			acticveCards: straightNumbers,
+		}
+	}
+
+	return HandResult{
+		Combination: -1,
+	}
+}
 func getCombinationLengthMap() CombinationLength {
 	return CombinationLength{
 		1: HIGH_CARD,
