@@ -49,7 +49,7 @@ func SimulatePreFlopStandOff(simulationSize int) {
 			handStats[hand.ExportHand()][0]++
 		}
 
-		result := utils.CompareHands(hands[0], hands[1], game.GetRiver())
+		result := utils.CompareHands(hands, game.GetRiver())
 		if result.Winner == -1 {
 			for _, hand := range hands {
 				handStats[hand.ExportHand()][2]++
@@ -105,17 +105,7 @@ func SimulatePreFlopThreePlayers(simulationSize int) {
 		}
 
 		result := utils.GameResult{Winner: -1}
-		currentWinner := 0
-		for i := 0; i < playersCount-1; i++ {
-			result = utils.CompareHands(hands[currentWinner], hands[i+1], game.GetRiver())
-			if result.Winner == 0 {
-				result.Winner = i
-				currentWinner = i
-			} else if result.Winner == 1 {
-				result.Winner = i + 1
-				currentWinner = i + 1
-			}
-		}
+		result = utils.CompareHands(hands, game.GetRiver())
 
 		if result.Winner == -1 {
 			for _, hand := range hands {
@@ -164,22 +154,21 @@ func SimulateCombinationChance(simulationSize int) {
 	}
 
 	combinationMap := map[int]string{
-		0 : "High Card",
-		1 : "Pair",
-		2 : "Two Pair",
-		3 : "Three Of A Kind",
-		4 : "Straight",
-		5 : "Flush",
-		6 : "Full House",
-		7 : "Four Of A Kind",
-		8 : "Straight Flush",
-		9 : "High Card",
-
+		0: "High Card",
+		1: "Pair",
+		2: "Two Pair",
+		3: "Three Of A Kind",
+		4: "Straight",
+		5: "Flush",
+		6: "Full House",
+		7: "Four Of A Kind",
+		8: "Straight Flush",
+		9: "High Card",
 	}
 
-	for key := 0; key < len(handStats);key++{
+	for key := 0; key < len(handStats); key++ {
 		hits := handStats[key]
-		_, err = db.Exec(`INSERT INTO Combinations (hand, hits, chance) VALUES (?, ?, ?)`, combinationMap[key], hits, float32(hits) / float32(simulationSize) * 100)
+		_, err = db.Exec(`INSERT INTO Combinations (hand, hits, chance) VALUES (?, ?, ?)`, combinationMap[key], hits, float32(hits)/float32(simulationSize)*100)
 
 	}
 }

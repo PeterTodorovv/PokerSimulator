@@ -5,7 +5,7 @@ import "sort"
 func CalculateHand(hand Hand, river []Card) HandResult {
 	scoreHand := append(hand.cards, river...)
 	sortedHand := sortHand(scoreHand)
-	combination := CalculateCombinations2(hand, river)
+	combination := calculateCombinations2(hand, river)
 
 	straightCombination := getStreight(sortedHand)
 
@@ -31,27 +31,36 @@ func CalculateHand(hand Hand, river []Card) HandResult {
 	return combination
 }
 
-func CompareHands(hand1 Hand, hand2 Hand, river []Card) GameResult {
+func CompareHands(hands []Hand, river []Card) GameResult {
 	gameResult := GameResult{Winner: -1}
+	handResults := []HandResult{}
+	pointer := 0
+	for _, hand := range hands {
+		handResults = append(handResults, CalculateHand(hand, river))
+	}
 
-	hand1Result := CalculateHand(hand1, river)
-	hand2Result := CalculateHand(hand2, river)
+	for i := 1; i < len(hands); i++ {
+		hand1Result := handResults[pointer]
+		hand2Result := handResults[i]
 
-	if hand1Result.Combination > hand2Result.Combination {
-		gameResult.Winner = 0
-	} else if hand1Result.Combination < hand2Result.Combination {
-		gameResult.Winner = 1
-	} else {
-		activeCards1 := hand1Result.acticveCards
-		activeCards2 := hand2Result.acticveCards
+		if hand1Result.Combination > hand2Result.Combination {
+			gameResult.Winner = pointer
+		} else if hand1Result.Combination < hand2Result.Combination {
+			pointer = i
+			gameResult.Winner = pointer
+		} else {
+			activeCards1 := hand1Result.acticveCards
+			activeCards2 := hand2Result.acticveCards
 
-		for i := 0; i < 5; i++ {
-			if activeCards1[i] > activeCards2[i] {
-				gameResult.Winner = 0
-				break
-			} else if activeCards1[i] < activeCards2[i] {
-				gameResult.Winner = 1
-				break
+			for j := 0; j < 5; j++ {
+				if activeCards1[j] > activeCards2[j] {
+					gameResult.Winner = pointer
+					break
+				} else if activeCards1[j] < activeCards2[j] {
+					gameResult.Winner = i
+					pointer = i
+					break
+				}
 			}
 		}
 	}
@@ -59,7 +68,7 @@ func CompareHands(hand1 Hand, hand2 Hand, river []Card) GameResult {
 	return gameResult
 }
 
-func CalculateCombinations2(hand Hand, river []Card) HandResult {
+func calculateCombinations2(hand Hand, river []Card) HandResult {
 	scoreHand := append(hand.cards, river...)
 	sortedHand := sortHand(scoreHand)
 
