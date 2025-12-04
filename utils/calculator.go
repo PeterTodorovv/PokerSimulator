@@ -49,8 +49,8 @@ func CompareHands(hands []Hand, river []Card) GameResult {
 			pointer = i
 			gameResult.Winner = pointer
 		} else {
-			activeCards1 := hand1Result.acticveCards
-			activeCards2 := hand2Result.acticveCards
+			activeCards1 := hand1Result.ActicveCards
+			activeCards2 := hand2Result.ActicveCards
 
 			for j := 0; j < 5; j++ {
 				if activeCards1[j] > activeCards2[j] {
@@ -112,10 +112,15 @@ func calculateCombinations2(hand Hand, river []Card) HandResult {
 
 			for i := 0; i < 3; i++ {
 				scoringNumbers = append(scoringNumbers, kv.Key)
+
+				if len(scoringNumbers) == 5 {
+					result.Combination = FULL_HOUSE
+					break
+				}
 			}
 		}
 
-		if kv.Value == 2 {
+		if kv.Value == 2 && len(scoringNumbers) < 4{
 
 			if result.Combination == 0 {
 				result.Combination = PAIR
@@ -143,7 +148,7 @@ func calculateCombinations2(hand Hand, river []Card) HandResult {
 		}
 	}
 
-	result.acticveCards = scoringNumbers
+	result.ActicveCards = scoringNumbers
 	return result
 }
 
@@ -200,31 +205,31 @@ func getFlush(scoreHand []Card) HandResult {
 		}
 	}
 
-	if len(clubs) == 5 {
+	if len(clubs) >= 5 {
 		return HandResult{
 			Combination:  FLUSH,
-			acticveCards: clubs,
+			ActicveCards: clubs[:5],
 		}
 	}
 
-	if len(diamons) == 5 {
+	if len(diamons) >= 5 {
 		return HandResult{
 			Combination:  FLUSH,
-			acticveCards: diamons,
+			ActicveCards: diamons[:5],
 		}
 	}
 
-	if len(hearts) == 5 {
+	if len(hearts) >= 5 {
 		return HandResult{
 			Combination:  FLUSH,
-			acticveCards: hearts,
+			ActicveCards: hearts[:5],
 		}
 	}
 
-	if len(spades) == 5 {
+	if len(spades) >= 5 {
 		return HandResult{
 			Combination:  FLUSH,
-			acticveCards: spades,
+			ActicveCards: spades[:5],
 		}
 	}
 
@@ -269,7 +274,7 @@ func getStreight(scoreHand []Card) HandResult {
 	if len(highStreak) >= 5 {
 		return HandResult{
 			Combination:  STRAIGHT,
-			acticveCards: straightNumbers,
+			ActicveCards: straightNumbers,
 		}
 	}
 
@@ -317,7 +322,7 @@ func getStreightFlush(scoreHand []Card) HandResult {
 	if len(highStreak) >= 5 {
 		return HandResult{
 			Combination:  STRAIGHT,
-			acticveCards: straightNumbers,
+			ActicveCards: straightNumbers,
 		}
 	}
 
@@ -339,7 +344,7 @@ func getCombinationLengthMap() CombinationLength {
 type HandResult struct {
 	Combination         int
 	highCardCombination int
-	acticveCards        []int
+	ActicveCards        []int
 }
 
 type GameResult struct {
